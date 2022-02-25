@@ -46,17 +46,36 @@ class StreamController
     {
         $response = new StreamedResponse(
             function () {
-                for ($i = 0; $i < 10; $i++) {
-                    echo "id: $i\n";
+                $counter = 0;
+
+                while (true) {
+                    $counter++;
+                    echo "id: $counter\n";
                     echo "event: ping\n";
                     echo 'data: {"name": "Hello World"}';
                     echo "\n\n";
                     ob_flush();
                     flush();
+
+                    sleep(1);
                 }
             },
             200
         );
+        $response->headers->set('X-Accel-Buffering', 'no');
+        $response->headers->set('Cache-Control', 'no-store');
+        $response->headers->set('Content-Type', 'text/event-stream');
+        $response->headers->set('Access-Control-Allow-Origin', 'http://localhost:63342');
+        $response->headers->set('Access-Control-Allow-Headers', 'Cache-Control, X-Requested-With, Content-Type, Accept, Origin, Authorization');
+        $response->headers->set('Access-Control-Allow-Methods', 'GET, OPTIONS');
+
+        return $response;
+    }
+
+    #[Route(path: '/api/v3/stream', methods: ['GET', 'OPTIONS'])]
+    public function v3(): Response
+    {
+        $response = new CustomResponse('', 200);
         $response->headers->set('X-Accel-Buffering', 'no');
         $response->headers->set('Cache-Control', 'no-store');
         $response->headers->set('Content-Type', 'text/event-stream');
